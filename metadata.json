@@ -1,0 +1,8 @@
+{
+  "name": "Remix Personal Portfolio \u0026 Copy Studio",
+  "description": "A modern, high-converting personal portfolio website and UX/UI copy generator with live preview, interactive section layouts, customized copywriting engine, and code export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
