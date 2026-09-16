@@ -1,479 +1,379 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Wand2, RotateCcw, Check, Layers, AlertCircle, RefreshCw, User, Briefcase, FileCode2, Sliders } from 'lucide-react';
-import { PortfolioData, UserProfileInput } from '../types';
-import { presetProfiles } from '../data/initialData';
+import { X, Sparkles, Copy, Check, User, Code2, Mail, GraduationCap, Shield } from 'lucide-react';
+import { PortfolioData } from '../types';
 import { useToast } from './Toast';
 
 interface CopyStudioDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   portfolioData: PortfolioData;
-  onUpdatePortfolioData: (data: PortfolioData) => void;
+  onUpdatePortfolioData?: (data: PortfolioData) => void;
 }
 
 export const CopyStudioDrawer: React.FC<CopyStudioDrawerProps> = ({
   isOpen,
   onClose,
   portfolioData,
-  onUpdatePortfolioData,
 }) => {
-  const [profileInput, setProfileInput] = useState<UserProfileInput>(portfolioData.profile);
-  const [selectedPreset, setSelectedPreset] = useState<string>('cybersec');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile-gen' | 'direct-edit'>('profile-gen');
-  const [editSection, setEditSection] = useState<'hero' | 'about' | 'skills' | 'projects' | 'services' | 'testimonials' | 'contact'>('hero');
-
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const { showToast } = useToast();
 
   if (!isOpen) return null;
 
-  const handleApplyPreset = (presetKey: string) => {
-    setSelectedPreset(presetKey);
-    const preset = presetProfiles[presetKey];
-    if (preset) {
-      setProfileInput(preset.profile);
-      showToast(`Loaded "${preset.label}" details!`, 'info');
-    }
+  const copyToClipboard = (text: string, label: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    showToast(`Copied ${label} to clipboard!`, 'success');
+    setTimeout(() => {
+      setCopiedKey((curr) => (curr === key ? null : curr));
+    }, 2000);
   };
 
-  const handleGenerateCopy = async () => {
-    setIsGenerating(true);
-    try {
-      let updatedData: PortfolioData | null = null;
-      try {
-        const response = await fetch('/api/generate-portfolio-copy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(profileInput),
-        });
+  // Generate full markdown/plain profile details
+  const fullProfileDetails = `# ${portfolioData.profile.name}
+${portfolioData.profile.title}
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            updatedData = {
-              ...result.data,
-              profile: profileInput,
-            };
-          }
-        }
-      } catch (networkErr) {
-        console.warn('Backend API unavailable (e.g. running statically on GitHub Pages), using dynamic client synthesizer:', networkErr);
-      }
+## Academic Background & Education
+- Degree: Bachelor of Science in Computer Science & Engineering (B.Sc. in CSE)
+- Institution: Islamic University (IU), Kushtia, Bangladesh
+- Focus: Cybersecurity, Ethical Hacking, Web Development & AI
 
-      // If backend was not reached or returned non-200 (e.g. static GitHub Pages hosting), provide smart dynamic synthesis
-      if (!updatedData) {
-        updatedData = {
-          ...portfolioData,
-          profile: profileInput,
-          hero: {
-            ...portfolioData.hero,
-            headline: `${profileInput.name} — ${profileInput.title}`,
-            subheadline: `Driven by ${profileInput.skills.split(',').slice(0, 3).join(', ')}. Engineered for ${profileInput.targetAudience.toLowerCase()} with high-impact results.`,
-          },
-          about: {
-            ...portfolioData.about,
-            bioParagraph1: `I am ${profileInput.name}, a passionate technologist specializing in ${profileInput.title}. With ${profileInput.experience}, I combine deep technical expertise with rapid execution.`,
-          },
-        };
-        onUpdatePortfolioData(updatedData);
-        showToast('Updated portfolio copy with custom profile details!', 'success');
-      } else {
-        onUpdatePortfolioData(updatedData);
-        showToast('Generated fresh high-converting portfolio copy with Gemini!', 'success');
-      }
-    } catch (err: any) {
-      console.error('Error generating copy:', err);
-      showToast(err?.message || 'Error updating copy. Please try again.', 'error');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+## Professional Headline
+${portfolioData.hero.headline}
+${portfolioData.hero.subheadline}
+
+## About Me / Bio
+${portfolioData.about.bioParagraph1}
+
+${portfolioData.about.bioParagraph2}
+
+## Core Technical Skills
+${portfolioData.skills.categories
+  .map(
+    (c) =>
+      `### ${c.categoryName}\n` +
+      c.skillsList.map((s) => `- ${s.name} (${s.level}): ${s.context}`).join('\n')
+  )
+  .join('\n\n')}
+
+## Featured Projects
+${portfolioData.projects.projectList
+  .map(
+    (p) =>
+      `### ${p.title} [${p.category}]\n${p.description}\nImpact: ${p.impact}\nTools: ${p.tools.join(', ')}`
+  )
+  .join('\n\n')}
+
+## Services & Expertise
+${portfolioData.services.serviceList
+  .map((s) => `- ${s.title}: ${s.valueProposition}`)
+  .join('\n')}
+
+## Contact Details
+- Direct Email: ${portfolioData.contact.directEmail}
+- GitHub: https://github.com/users/jayedcyberfinix-blip/projects/1/views/1
+- Location / Campus: Islamic University (IU), Kushtia, Bangladesh
+`;
+
+  const fullBioText = `${portfolioData.about.bioParagraph1}\n\n${portfolioData.about.bioParagraph2}`;
+
+  const allSkillsText = portfolioData.skills.categories
+    .map(
+      (c) =>
+        `${c.categoryName}:\n` +
+        c.skillsList.map((s) => `• ${s.name} (${s.level}) - ${s.context}`).join('\n')
+    )
+    .join('\n\n');
+
+  const allProjectsText = portfolioData.projects.projectList
+    .map(
+      (p) =>
+        `Project: ${p.title} (${p.category})\nDescription: ${p.description}\nImpact: ${p.impact}\nTech Stack: ${p.tools.join(', ')}`
+    )
+    .join('\n\n');
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-hidden animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-xl bg-slate-900 border-l border-slate-700 shadow-2xl flex flex-col justify-between text-slate-200">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+        <div className="w-screen max-w-2xl bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col justify-between text-slate-200">
           {/* Drawer Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
+          <div className="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">
-                  Portfolio Copy & UX Studio
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>AI Copy Studio</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 font-semibold border border-sky-500/20">
+                    Details Copy
+                  </span>
                 </h3>
                 <p className="text-xs text-slate-400">
-                  AI Conversion Copywriting Engine
+                  Quick 1-click copy for MD Jayed's details, bio, skills & contact
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+              aria-label="Close Drawer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Mode Switcher Tabs */}
-          <div className="px-6 pt-4 border-b border-slate-800 flex gap-4 text-xs font-bold bg-slate-900">
+          {/* Master Copy Button Bar */}
+          <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-slate-200">All Profile Details</p>
+              <p className="text-[11px] text-slate-400">Copy entire portfolio profile in structured format</p>
+            </div>
             <button
-              onClick={() => setActiveTab('profile-gen')}
-              className={`pb-3 border-b-2 flex items-center gap-1.5 transition-colors ${
-                activeTab === 'profile-gen'
-                  ? 'border-sky-400 text-sky-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              onClick={() => copyToClipboard(fullProfileDetails, 'All Profile Details', 'all-details')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
+                copiedKey === 'all-details'
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-sky-500 text-slate-950 hover:bg-sky-400'
               }`}
             >
-              <Wand2 className="w-3.5 h-3.5" />
-              AI Copy Generator
-            </button>
-            <button
-              onClick={() => setActiveTab('direct-edit')}
-              className={`pb-3 border-b-2 flex items-center gap-1.5 transition-colors ${
-                activeTab === 'direct-edit'
-                  ? 'border-sky-400 text-sky-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              Direct Text Editor
+              {copiedKey === 'all-details' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedKey === 'all-details' ? 'Copied All!' : 'Copy All Details'}</span>
             </button>
           </div>
 
-          {/* Drawer Body Scrollable */}
-          <div className="p-6 overflow-y-auto flex-1 space-y-6">
-            {activeTab === 'profile-gen' ? (
-              <div className="space-y-5">
-                {/* Industry Presets Selector */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-2">
-                    Quick Preset Profile Templates
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(presetProfiles).map(([key, item]) => (
-                      <button
-                        key={key}
-                        onClick={() => handleApplyPreset(key)}
-                        className={`p-2.5 rounded-xl text-left text-xs font-semibold border transition-all ${
-                          selectedPreset === key
-                            ? 'bg-sky-500/10 text-sky-300 border-sky-500/30 shadow-xs'
-                            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Profile Form Fields */}
-                <div className="space-y-4 pt-2 border-t border-slate-800">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">
-                        Your Full Name
-                      </label>
-                      <input
-                        type="text"
-                        value={profileInput.name}
-                        onChange={(e) => setProfileInput({ ...profileInput, name: e.target.value })}
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">
-                        Years of Experience
-                      </label>
-                      <input
-                        type="text"
-                        value={profileInput.experience}
-                        onChange={(e) =>
-                          setProfileInput({ ...profileInput, experience: e.target.value })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Professional Title
-                    </label>
-                    <input
-                      type="text"
-                      value={profileInput.title}
-                      onChange={(e) => setProfileInput({ ...profileInput, title: e.target.value })}
-                      placeholder="e.g. Full Stack Web Developer / UI/UX Designer"
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Core Skills & Tech Stack
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={profileInput.skills}
-                      onChange={(e) => setProfileInput({ ...profileInput, skills: e.target.value })}
-                      placeholder="e.g. React, Node.js, Tailwind CSS, PostgreSQL, Figma"
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Major Projects / Best Achievements
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={profileInput.projects}
-                      onChange={(e) => setProfileInput({ ...profileInput, projects: e.target.value })}
-                      placeholder="1-2 lines about your best work and measurable impact"
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Target Audience / Clients
-                    </label>
-                    <input
-                      type="text"
-                      value={profileInput.targetAudience}
-                      onChange={(e) =>
-                        setProfileInput({ ...profileInput, targetAudience: e.target.value })
-                      }
-                      placeholder="e.g. Tech Startups, Growth Companies, Global Clients"
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
-                      Tone of Voice
-                    </label>
-                    <input
-                      type="text"
-                      value={profileInput.tone}
-                      onChange={(e) => setProfileInput({ ...profileInput, tone: e.target.value })}
-                      placeholder="Confident, professional, modern, and accessible"
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-sky-400"
-                    />
-                  </div>
+          {/* Drawer Body - Pure Read & Copy Sections */}
+          <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6">
+            {/* 1. Basic Info & Headline */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-400">
+                  <User className="w-4 h-4" />
+                  <span>Profile & Academic Details</span>
                 </div>
               </div>
-            ) : (
-              /* Direct Text Editor */
-              <div className="space-y-4">
-                <div className="flex gap-1 overflow-x-auto pb-2">
-                  {(['hero', 'about', 'skills', 'projects', 'services', 'testimonials', 'contact'] as const).map(
-                    (sec) => (
-                      <button
-                        key={sec}
-                        onClick={() => setEditSection(sec)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold capitalize whitespace-nowrap ${
-                          editSection === sec
-                            ? 'bg-sky-500 text-slate-950'
-                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                        }`}
-                      >
-                        {sec}
-                      </button>
+
+              {/* Name */}
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">Full Name</p>
+                  <p className="text-xs font-semibold text-white truncate">{portfolioData.profile.name}</p>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(portfolioData.profile.name, 'Name', 'name')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'name' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey === 'name' ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+
+              {/* Title */}
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">Professional Title</p>
+                  <p className="text-xs font-semibold text-white truncate">{portfolioData.profile.title}</p>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(portfolioData.profile.title, 'Professional Title', 'title')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'title' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey === 'title' ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+
+              {/* Education */}
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">University & Degree</p>
+                  <p className="text-xs font-semibold text-white">
+                    B.Sc. in CSE • Islamic University (IU), Kushtia, Bangladesh
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    copyToClipboard(
+                      'Bachelor of Science in Computer Science & Engineering (B.Sc. in CSE) - Islamic University (IU), Kushtia, Bangladesh',
+                      'Education',
+                      'education'
                     )
-                  )}
-                </div>
-
-                {editSection === 'hero' && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Headline</label>
-                      <textarea
-                        rows={2}
-                        value={portfolioData.hero.headline}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            hero: { ...portfolioData.hero, headline: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Subheadline</label>
-                      <textarea
-                        rows={3}
-                        value={portfolioData.hero.subheadline}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            hero: { ...portfolioData.hero, subheadline: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Primary CTA</label>
-                        <input
-                          type="text"
-                          value={portfolioData.hero.primaryCta}
-                          onChange={(e) =>
-                            onUpdatePortfolioData({
-                              ...portfolioData,
-                              hero: { ...portfolioData.hero, primaryCta: e.target.value },
-                            })
-                          }
-                          className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Secondary CTA</label>
-                        <input
-                          type="text"
-                          value={portfolioData.hero.secondaryCta}
-                          onChange={(e) =>
-                            onUpdatePortfolioData({
-                              ...portfolioData,
-                              hero: { ...portfolioData.hero, secondaryCta: e.target.value },
-                            })
-                          }
-                          className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {editSection === 'about' && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Bio Paragraph 1</label>
-                      <textarea
-                        rows={4}
-                        value={portfolioData.about.bioParagraph1}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            about: { ...portfolioData.about, bioParagraph1: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Bio Paragraph 2</label>
-                      <textarea
-                        rows={4}
-                        value={portfolioData.about.bioParagraph2}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            about: { ...portfolioData.about, bioParagraph2: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {editSection === 'contact' && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Closing Hook</label>
-                      <textarea
-                        rows={3}
-                        value={portfolioData.contact.closingStatement}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            contact: { ...portfolioData.contact, closingStatement: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Direct Email</label>
-                      <input
-                        type="email"
-                        value={portfolioData.contact.directEmail}
-                        onChange={(e) =>
-                          onUpdatePortfolioData({
-                            ...portfolioData,
-                            contact: { ...portfolioData.contact, directEmail: e.target.value },
-                          })
-                        }
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-700 text-white"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {['skills', 'projects', 'services', 'testimonials'].includes(editSection) && (
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400">
-                    <p className="font-semibold text-white mb-1">
-                      Multi-Item Section: {editSection.toUpperCase()}
-                    </p>
-                    <p>
-                      Use the "AI Copy Generator" to generate tailored items for your stack, or view
-                      the Copy & UX Spec tab to copy and paste modular card items.
-                    </p>
-                  </div>
-                )}
+                  }
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'education' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey === 'education' ? 'Copied' : 'Copy'}</span>
+                </button>
               </div>
-            )}
+
+              {/* Headline */}
+              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">Headline & Pitch</p>
+                  <button
+                    onClick={() => copyToClipboard(portfolioData.hero.headline, 'Headline', 'headline')}
+                    className="px-2.5 py-1 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                  >
+                    {copiedKey === 'headline' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedKey === 'headline' ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  {portfolioData.hero.headline}
+                </p>
+              </div>
+            </div>
+
+            {/* 2. Bio & About Me */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-400">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>About Me & Bio</span>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(fullBioText, 'Bio / About Me', 'bio')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'bio' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'bio' ? 'Copied Bio' : 'Copy Bio'}</span>
+                </button>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2 leading-relaxed">
+                <p>{portfolioData.about.bioParagraph1}</p>
+                <p>{portfolioData.about.bioParagraph2}</p>
+              </div>
+            </div>
+
+            {/* 3. Core Technical Skills */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-400">
+                  <Shield className="w-4 h-4" />
+                  <span>Core Skills & Cybersecurity Stack</span>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(allSkillsText, 'Skills List', 'skills')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'skills' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'skills' ? 'Copied Skills' : 'Copy Skills'}</span>
+                </button>
+              </div>
+              <div className="space-y-2">
+                {portfolioData.skills.categories.map((cat) => (
+                  <div key={cat.categoryName} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+                    <p className="font-bold text-sky-300 text-xs">{cat.categoryName}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.skillsList.map((skill) => (
+                        <span
+                          key={skill.name}
+                          className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-[11px]"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. Featured Projects */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-400">
+                  <Code2 className="w-4 h-4" />
+                  <span>Featured Projects</span>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(allProjectsText, 'Projects List', 'projects')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'projects' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedKey === 'projects' ? 'Copied Projects' : 'Copy Projects'}</span>
+                </button>
+              </div>
+              <div className="space-y-2">
+                {portfolioData.projects.projectList.map((proj) => (
+                  <div key={proj.id} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-white text-xs">{proj.title}</p>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                        {proj.category}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">{proj.description}</p>
+                    <p className="text-[11px] text-emerald-400 font-medium">Impact: {proj.impact}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 5. Contact & Socials */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-400">
+                  <Mail className="w-4 h-4" />
+                  <span>Contact Information & Links</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">Direct Email</p>
+                  <p className="text-xs font-semibold text-white truncate">{portfolioData.contact.directEmail}</p>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(portfolioData.contact.directEmail, 'Email', 'email')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'email' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey === 'email' ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">GitHub Profile / Projects</p>
+                  <p className="text-xs font-semibold text-white truncate">
+                    https://github.com/users/jayedcyberfinix-blip/projects/1/views/1
+                  </p>
+                </div>
+                <button
+                  onClick={() =>
+                    copyToClipboard(
+                      'https://github.com/users/jayedcyberfinix-blip/projects/1/views/1',
+                      'GitHub URL',
+                      'github-url'
+                    )
+                  }
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1 transition-colors"
+                >
+                  {copiedKey === 'github-url' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey === 'github-url' ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Drawer Footer CTA */}
-          <div className="p-6 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+          {/* Drawer Footer */}
+          <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+            <span className="text-[11px] text-slate-400">
+              MD Jayed • Islamic University (IU), Bangladesh
+            </span>
             <button
               onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl transition-colors"
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700 transition-colors"
             >
               Close
             </button>
-
-            {activeTab === 'profile-gen' ? (
-              <button
-                onClick={handleGenerateCopy}
-                disabled={isGenerating}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-sky-500 text-slate-950 hover:bg-sky-400 disabled:opacity-50 transition-all flex items-center gap-2 shadow-sm"
-              >
-                {isGenerating ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-950" />
-                    <span>Synthesizing Copy...</span>
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-3.5 h-3.5 text-slate-950" />
-                    <span>Generate Copy Suite</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  showToast('Edits saved to live preview!', 'success');
-                  onClose();
-                }}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-sky-500 text-slate-950 hover:bg-sky-400 transition-all"
-              >
-                Apply Changes
-              </button>
-            )}
           </div>
         </div>
       </div>

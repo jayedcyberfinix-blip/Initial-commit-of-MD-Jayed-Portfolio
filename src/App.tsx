@@ -14,7 +14,7 @@ import { ContactSection } from './components/ContactSection';
 import { UXSpecView } from './components/UXSpecView';
 import { CopyStudioDrawer } from './components/CopyStudioDrawer';
 import { CodeExportModal } from './components/CodeExportModal';
-import { Sparkles, ArrowUp, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 export default function App() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(initialPortfolioData);
@@ -147,7 +147,7 @@ export default function App() {
                   {portfolioData.profile.name} • {portfolioData.profile.title}
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  Engineered with React 19, Tailwind CSS & Gemini AI Copy Engine
+                  Engineered with React 19, TypeScript & Tailwind CSS
                 </p>
               </div>
             </div>
@@ -161,28 +161,6 @@ export default function App() {
                 className="hover:text-white transition-colors"
               >
                 Portfolio
-              </button>
-              <button
-                onClick={() => {
-                  setActiveView('ux-spec');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="hover:text-white transition-colors"
-              >
-                Copy Specs
-              </button>
-              <button
-                onClick={() => setIsStudioOpen(true)}
-                className="hover:text-sky-400 transition-colors flex items-center gap-1 font-semibold"
-              >
-                <Sparkles className="w-3 h-3 text-sky-400" />
-                Regenerate Copy
-              </button>
-              <button
-                onClick={() => setIsExportOpen(true)}
-                className="hover:text-emerald-400 transition-colors font-semibold"
-              >
-                Export Code
               </button>
             </div>
 

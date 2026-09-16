@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Terminal, Code2, Shield, GraduationCap, Menu, X, ChevronRight, Layers, FileDown, Wand2, Download, Github } from 'lucide-react';
+import { Sparkles, Terminal, Code2, Shield, GraduationCap, Menu, X, ChevronRight, Layers, FileDown, Download, Github } from 'lucide-react';
 import { ThemePreset, ViewMode } from '../types';
 import { themes } from '../utils/theme';
 import jayedPhoto from '../assets/jayed.jpg';
@@ -184,11 +184,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenStudio}
               className="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 px-3 py-2 rounded-xl transition-all shadow-2xs"
-              title="Open AI Copy Generator"
+              title="Open AI Copy Studio"
             >
               <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden md:inline">AI Copy Studio</span>
-              <span className="md:hidden">AI Copy</span>
+              <span className="inline">AI Copy Studio</span>
             </button>
 
             {/* GitHub Projects Link */}
