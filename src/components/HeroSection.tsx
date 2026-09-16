@@ -17,12 +17,10 @@ import {
   Linkedin,
   Mail,
   Github,
-  Camera,
 } from 'lucide-react';
 import { HeroSectionData, ThemePreset } from '../types';
 import { themes } from '../utils/theme';
 import { useToast } from './Toast';
-import { PhotoUploadModal } from './PhotoUploadModal';
 import jayedPhoto from '../assets/jayed.jpg';
 
 interface HeroSectionProps {
@@ -47,7 +45,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [showUxNote, setShowUxNote] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string>(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
@@ -284,19 +281,8 @@ Email: jayedcyberfinix@gmail.com
                   {/* Subtle Gradient Overlay for Text Legibility */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity pointer-events-none" />
 
-                  {/* Top Action Buttons: Upload/Change Photo & Fullscreen Expand */}
+                  {/* Top Action Button: Fullscreen Expand */}
                   <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsUploadModalOpen(true);
-                      }}
-                      className="p-2 sm:p-2.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-sky-400 hover:text-white border border-slate-700/80 backdrop-blur-md transition-all shadow-lg hover:scale-105"
-                      title="ছবি পরিবর্তন বা আপলোড করুন"
-                      aria-label="ছবি পরিবর্তন বা আপলোড করুন"
-                    >
-                      <Camera className="w-4 h-4 text-sky-400" />
-                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -466,30 +452,16 @@ Email: jayedcyberfinix@gmail.com
             {/* Modal Footer */}
             <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
               <span>Computer Science & Engineering • Islamic University (IU), Bangladesh</span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    setIsPhotoModalOpen(false);
-                    setIsUploadModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center gap-1.5 transition-colors"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>নতুন ছবি পরিবর্তন করুন</span>
-                </button>
-              </div>
+              <button
+                onClick={() => setIsPhotoModalOpen(false)}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-colors"
+              >
+                বন্ধ করুন
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Photo Upload & Change Modal */}
-      <PhotoUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        currentPhotoUrl={photoUrl}
-        onPhotoUpdated={(newUrl) => setPhotoUrl(newUrl)}
-      />
     </section>
   );
 };
