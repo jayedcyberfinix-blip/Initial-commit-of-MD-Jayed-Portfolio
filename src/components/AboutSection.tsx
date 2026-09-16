@@ -28,7 +28,7 @@ interface AboutSectionProps {
   theme: ThemePreset;
 }
 
-const CURRENT_PHOTO_VERSION = 'july_photo_2026_v2';
+const CURRENT_PHOTO_VERSION = 'july_photo_official_v3';
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ data, theme }) => {
   const [showUxNote, setShowUxNote] = useState(false);

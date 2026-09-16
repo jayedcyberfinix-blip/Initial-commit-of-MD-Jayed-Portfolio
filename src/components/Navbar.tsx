@@ -15,7 +15,7 @@ interface NavbarProps {
   onOpenExport: () => void;
 }
 
-const CURRENT_PHOTO_VERSION = 'july_photo_2026_v2';
+const CURRENT_PHOTO_VERSION = 'july_photo_official_v3';
 
 export const Navbar: React.FC<NavbarProps> = ({
   name,
