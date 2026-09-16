@@ -17,10 +17,12 @@ import {
   Linkedin,
   Mail,
   Github,
+  Camera,
 } from 'lucide-react';
 import { HeroSectionData, ThemePreset } from '../types';
 import { themes } from '../utils/theme';
 import { useToast } from './Toast';
+import { PhotoUploadModal } from './PhotoUploadModal';
 import jayedPhoto from '../assets/jayed.jpg';
 
 interface HeroSectionProps {
@@ -32,7 +34,7 @@ interface HeroSectionProps {
   onSecondaryClick: () => void;
 }
 
-const CURRENT_PHOTO_VERSION = 'july_photo_2026_v1';
+const CURRENT_PHOTO_VERSION = 'july_photo_2026_v2';
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   data,
@@ -45,10 +47,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [showUxNote, setShowUxNote] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string>(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           return saved;
@@ -69,7 +72,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   useEffect(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           setPhotoUrl(saved);
@@ -281,15 +284,27 @@ Email: jayedcyberfinix@gmail.com
                   {/* Subtle Gradient Overlay for Text Legibility */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity pointer-events-none" />
 
-                  {/* Top Action Button: Fullscreen Expand */}
-                  <div className="absolute top-3.5 right-3.5 z-10">
+                  {/* Top Action Buttons: Upload/Change Photo & Fullscreen Expand */}
+                  <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsUploadModalOpen(true);
+                      }}
+                      className="p-2 sm:p-2.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-sky-400 hover:text-white border border-slate-700/80 backdrop-blur-md transition-all shadow-lg hover:scale-105"
+                      title="ছবি পরিবর্তন বা আপলোড করুন"
+                      aria-label="ছবি পরিবর্তন বা আপলোড করুন"
+                    >
+                      <Camera className="w-4 h-4 text-sky-400" />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsPhotoModalOpen(true);
                       }}
-                      className="p-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-700 backdrop-blur-md transition-all shadow-md"
-                      title="View Full Size"
+                      className="p-2 sm:p-2.5 rounded-xl bg-slate-950/85 hover:bg-slate-900 text-sky-400 hover:text-white border border-slate-700/80 backdrop-blur-md transition-all shadow-lg hover:scale-105"
+                      title="Click to view full HD portrait"
+                      aria-label="Click to view full HD portrait"
                     >
                       <Maximize2 className="w-4 h-4 text-sky-400" />
                     </button>
@@ -449,13 +464,32 @@ Email: jayedcyberfinix@gmail.com
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
               <span>Computer Science & Engineering • Islamic University (IU), Bangladesh</span>
-              <span className="text-sky-400 font-medium">Cybersecurity & Web Dev</span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setIsPhotoModalOpen(false);
+                    setIsUploadModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold flex items-center gap-1.5 transition-colors"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>নতুন ছবি পরিবর্তন করুন</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Photo Upload & Change Modal */}
+      <PhotoUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        currentPhotoUrl={photoUrl}
+        onPhotoUpdated={(newUrl) => setPhotoUrl(newUrl)}
+      />
     </section>
   );
 };

@@ -15,7 +15,7 @@ interface NavbarProps {
   onOpenExport: () => void;
 }
 
-const CURRENT_PHOTO_VERSION = 'july_photo_2026_v1';
+const CURRENT_PHOTO_VERSION = 'july_photo_2026_v2';
 
 export const Navbar: React.FC<NavbarProps> = ({
   name,
@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [photoUrl, setPhotoUrl] = useState<string>(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           return saved;
@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           setPhotoUrl(saved);

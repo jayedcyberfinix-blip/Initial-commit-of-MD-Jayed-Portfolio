@@ -28,7 +28,7 @@ interface AboutSectionProps {
   theme: ThemePreset;
 }
 
-const CURRENT_PHOTO_VERSION = 'july_photo_2026_v1';
+const CURRENT_PHOTO_VERSION = 'july_photo_2026_v2';
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ data, theme }) => {
   const [showUxNote, setShowUxNote] = useState(false);
@@ -37,7 +37,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ data, theme }) => {
   const [photoUrl, setPhotoUrl] = useState<string>(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           return saved;
@@ -54,7 +54,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ data, theme }) => {
   useEffect(() => {
     try {
       const version = localStorage.getItem('jayed_photo_version');
-      if (version === CURRENT_PHOTO_VERSION) {
+      if (version === 'custom_user_upload') {
         const saved = localStorage.getItem('jayed_photo_url');
         if (saved && saved.startsWith('data:image')) {
           setPhotoUrl(saved);
