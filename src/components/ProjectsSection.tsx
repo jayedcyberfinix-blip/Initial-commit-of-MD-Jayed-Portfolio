@@ -20,8 +20,10 @@ import { useToast } from './Toast';
 import expenseTrackerThumb from '../assets/images/expense_tracker_ui_1787151737199.jpg';
 import batchFundThumb from '../assets/images/batch_fund_ui_1787151754679.jpg';
 import khataGhorThumb from '../assets/images/khata_ghor_ui_1789483370026.jpg';
+import aiAgentWorkflowThumb from '../assets/images/ai_agent_workflow_1790363585290.jpg';
 
 const defaultProjectImages: Record<string, string> = {
+  'project-ai-chatbot': aiAgentWorkflowThumb,
   'project-expense-tracker': expenseTrackerThumb,
   'project-batch-fund': batchFundThumb,
   'project-khata-ghor': khataGhorThumb,

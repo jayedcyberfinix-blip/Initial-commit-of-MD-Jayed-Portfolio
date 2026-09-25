@@ -131,8 +131,35 @@ export const defaultPortfolioData: PortfolioData = {
   },
   skills: {
     intro:
-      'My technical capabilities span hands-on offensive & defensive cybersecurity tools, full-stack web engineering, and AI automation.',
+      'My technical capabilities span hands-on AI workflow automation (n8n & LLMs), offensive & defensive cybersecurity tools, and full-stack web engineering.',
     categories: [
+      {
+        categoryName: 'AI Automation (Beginner Level)',
+        description:
+          'Building autonomous intelligent workflows, multi-model AI agent routing, conversational memory persistence, and automated Google Sheets tool integrations.',
+        skillsList: [
+          {
+            name: 'AI Agent Architecture & n8n Workflows',
+            level: 'Beginner Level',
+            context: 'Designing autonomous multi-step reasoning agents connected to chat triggers and real-world tools.',
+          },
+          {
+            name: 'Multi-Model Routing & Fallback (OpenAI + Gemini)',
+            level: 'Beginner Level',
+            context: 'Configuring primary LLM execution (OpenAI GPT) with seamless automated fallback to Google Gemini.',
+          },
+          {
+            name: 'Conversational Memory Buffer',
+            level: 'Beginner Level',
+            context: 'Implementing Simple Memory buffers to maintain chat context and customer order history across exchanges.',
+          },
+          {
+            name: 'Google Sheets Automation & Tool Calling',
+            level: 'Beginner Level',
+            context: 'Empowering AI agents to read product catalogs, append customer orders, and query order statuses dynamically.',
+          },
+        ],
+      },
       {
         categoryName: 'Cybersecurity & Ethical Hacking',
         description: 'Vulnerability assessment, network scanning, penetration testing, and security hardening.',
@@ -185,35 +212,9 @@ export const defaultPortfolioData: PortfolioData = {
           },
         ],
       },
-      {
-        categoryName: 'AI Integration, Cloud Tools & Foundations',
-        description: 'Leveraging modern LLMs (Gemini), Google Forms & workflow automation, and core CSE principles.',
-        skillsList: [
-          {
-            name: 'Google Gemini API & AI Tooling',
-            level: 'Advanced',
-            context: 'Integrating AI models for automated code analysis, threat reports, and smart apps.',
-          },
-          {
-            name: 'Google Forms & Digital Surveys',
-            level: 'Expert',
-            context: 'Custom survey design, conditional branching logic, automated quizzes, and real-time Google Sheets synchronization.',
-          },
-          {
-            name: 'Data Structures & Algorithms',
-            level: 'Proficient',
-            context: 'Core CSE coursework at Islamic University: search trees, graphs, sorting, complexity.',
-          },
-          {
-            name: 'Git, GitHub & DevSecOps',
-            level: 'Advanced',
-            context: 'Version control, collaborative workflows, secure dependency audits, and CI/CD.',
-          },
-        ],
-      },
     ],
     uxLayoutNote:
-      'Categorized skills highlighting ethical hacking tools alongside web engineering, AI, and workflow automation.',
+      'Categorized skills highlighting beginner level AI automation workflows with n8n alongside cybersecurity and web development.',
   },
   projects: {
     intro:
@@ -377,12 +378,12 @@ export const defaultPortfolioData: PortfolioData = {
       {
         field: 'Your Name',
         purpose: 'So I know who I am speaking with.',
-        placeholder: 'e.g. Tanvir Ahmed',
+        placeholder: 'e.g. MD Jayed',
       },
       {
         field: 'Email Address',
         purpose: 'Direct contact coordinate for my reply.',
-        placeholder: 'e.g. tanvir@example.com',
+        placeholder: 'e.g. jayed@example.com',
       },
       {
         field: 'Topic / Service Needed',

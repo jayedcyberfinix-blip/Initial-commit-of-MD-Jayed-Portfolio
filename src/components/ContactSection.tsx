@@ -79,7 +79,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           <div className="max-w-2xl">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                Section 07
+                Section 05
               </span>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Get In Touch
@@ -277,7 +277,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Tanvir Ahmed"
+                        placeholder="e.g. MD Jayed"
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-700 text-white focus:outline-hidden focus:ring-2 focus:ring-sky-400 transition-all bg-slate-950/80"
@@ -291,7 +291,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       <input
                         type="email"
                         required
-                        placeholder="e.g. tanvir@example.com"
+                        placeholder="e.g. jayed@example.com"
                         value={formData.workEmail}
                         onChange={(e) => setFormData({ ...formData, workEmail: e.target.value })}
                         className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-700 text-white focus:outline-hidden focus:ring-2 focus:ring-sky-400 transition-all bg-slate-950/80"

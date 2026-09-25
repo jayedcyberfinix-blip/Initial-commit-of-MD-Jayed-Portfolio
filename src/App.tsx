@@ -8,8 +8,6 @@ import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
-import { ServicesSection } from './components/ServicesSection';
-import { TestimonialsSection } from './components/TestimonialsSection';
 import { ContactSection } from './components/ContactSection';
 import { UXSpecView } from './components/UXSpecView';
 import { CopyStudioDrawer } from './components/CopyStudioDrawer';
@@ -95,7 +93,7 @@ export default function App() {
                 theme={currentTheme}
               />
 
-              {/* 3. Skills & Expertise Section */}
+              {/* 3. Skills & AI Automation Section */}
               <SkillsSection
                 data={portfolioData.skills}
                 theme={currentTheme}
@@ -108,20 +106,7 @@ export default function App() {
                 onSelectProjectForContact={handleSelectProjectForContact}
               />
 
-              {/* 5. Services Offered Section */}
-              <ServicesSection
-                data={portfolioData.services}
-                theme={currentTheme}
-                onSelectServiceForInquiry={handleSelectServiceForInquiry}
-              />
-
-              {/* 6. Testimonials Section */}
-              <TestimonialsSection
-                data={portfolioData.testimonials}
-                theme={currentTheme}
-              />
-
-              {/* 7. Contact Me Section */}
+              {/* 5. Contact Me Section */}
               <ContactSection
                 data={portfolioData.contact}
                 name={portfolioData.profile.name}
